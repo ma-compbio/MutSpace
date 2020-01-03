@@ -8,20 +8,28 @@ from tqdm import tqdm
 
 
 def get_seq_mapping():
+    """convert mutation type to integer (index)"""
+    #TODO add support for indel and make it more convenient to modify this function
     mut_mapping = {'C->A': 0, 'C->G': 1, 'C->T': 2, 'T->A': 3, 'T->C': 4, 'T->G': 5}
     nuk_mapping = {'A': 0, 'C': 1, 'G': 2, 'T': 3}
     return mut_mapping, nuk_mapping
 
 
 def get_rev_seq_mapping():
+    """reverse operation for ger_seq_mapping"""
     mut_mapping = {0: 'C->A', 1: 'C->G', 2: 'C->T', 3: 'T->A', 4: 'T->C', 5: 'T->G'}
     nuk_mapping = {0: 'A', 1: 'C', 2: 'G', 3: 'T'}
     return mut_mapping, nuk_mapping
 
 
 def index(seq):
+    """convert an arbitary mutation pattern, ie the up- and downstream of mutation into an index
     # [up, down, mut]
     # [3, 1, 0, 2, 4] -> 1159
+    the last element indicates the nucleotide mapping for the reference base
+    the first half (except the last one) is the nucleotides mapping for the upstream bases
+    the second half (except the last one) is the nucleotides mapping for the downstream bases
+    """
     idx = 0
     for i, s in enumerate(seq):
         idx += (4 ** i) * s
@@ -82,6 +90,11 @@ class MutationDataset:
         self.num_fb = len(self.data[-1][2])
 
     def get_feature_id(self, f):
+        """
+        assign feature index to a new feature
+        by default self.feature_num is the number of rings
+        note f is a string so that only categorical features are supported
+        """
         if f not in self.feature_dict:
             self.feature_dict[f] = self.feature_num
             self.feature_num += 1
@@ -103,9 +116,13 @@ class MutationDataset:
                 if i == 0:
                     continue
 
+                # uid is patient id or sample id
                 uid = self.get_feature_id(line[header['uid']])
+                # a_features: categorical feature for each patient/sample
+                # b_features: cetegorical feature for each project/data
                 a_features, b_features = [], []
 
+                # convert mutation and its context into index
                 rings = self.decompose(line[header['upstream']], line[header['downstream']], line[header['var_type']])
                 a_features.extend(rings)
 
