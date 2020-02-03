@@ -5,6 +5,7 @@ from random import sample
 import torch
 import h5py
 from tqdm import tqdm
+import numpy as np
 
 
 def get_seq_mapping():
@@ -56,7 +57,7 @@ class Dataset:
 
     def process(self):
         """
-        This funtion should process the raw input into a format of
+        This function should process the raw input into a format of
         [[id, a_features, b_featuers]]
         :return:
         """
@@ -71,6 +72,74 @@ class Dataset:
 
     def __len__(self):
         return len(self.data)
+
+    def __getitem__(self, item):
+        return self.data[item]
+
+
+class MutationDatasetClassic: 
+    def __init__(self, data_path, context_width):
+        self.data_path = data_path
+        self.mut_mapping, self.nuk_mapping = get_seq_mapping()
+        self.context_width = context_width
+        self.feature_dict = dict()
+        self.feature_num = (6 * 4 ** (2 * self.context_width))
+        self.data = self.process()
+
+    def process(self):
+        """
+        This function process the raw input and convert the mutation into a patient to mutation pattern matrix () and a patient id to row of matrix, and a mutation pattern to column of matrix json
+        """
+        #
+        data = []
+        patient2row = dict()
+        pattern2col = dict()
+        #
+        datalist = os.listdir(self.data_path)
+        datalist = [".".join(name.split('.')[:-1]) for name in datalist if name.endswith('tsv')]
+        header = json.load(open(join(self.data_path, 'meta.json')))
+        print(datalist)
+        # 
+        matrix_list = []
+        for cname in datalist:
+            print(f'Loading {cname}...')
+            with open(os.path.join(self.data_path, f'{cname}.tsv'), 'r') as fin:
+                for i, line in enumerate(fin.readlines()):
+                    line = line.strip().split('\t')
+                    if i == 0: # skip header
+                        continue
+                    # uid is patient id or sample id
+                    uname = line[header['uid']]
+                    if patient2row.get(uname, None) is None:
+                        patient2row[uname] = len(patient2row)
+                        matrix_list.append(np.zeros(self.feature_num))
+                    uid = patient2row[uname]
+                    # get pattern
+                    up = line[header['upstream']]
+                    down = line[header['downstream']]
+                    up = up[-self.context_width:]
+                    down = down[:self.context_width]
+                    var_type = line[header['var_type']]
+                    pattern = up + '(' + var_type + ')' + down
+                    idx = self.decompose(up, down, var_type)
+                    if pattern2col.get(pattern, None) is None:
+                        pattern2col[pattern] = idx
+                    # update count
+                    matrix_list[uid][idx] += 1
+        # 
+        matrix = np.stack(matrix_list)
+        json.dump(patient2row, open(join(self.data_path, 'patient2row.json'), 'w'))
+        json.dump(pattern2col, open(join(self.data_path, 'pattern2col.json'), 'w'))
+        return matrix
+
+    def decompose(self, upstream, downstream, mutation):
+        mutation = [self.mut_mapping[mutation]]
+        up = [self.nuk_mapping[s] for s in upstream]
+        down = [self.nuk_mapping[s] for s in downstream]
+        return index(up + down + mutation) 
+
+    def __len__(self):
+        return len(matrix) 
 
     def __getitem__(self, item):
         return self.data[item]
@@ -100,7 +169,7 @@ class MutationDataset:
             self.feature_num += 1
         return self.feature_dict[f]
 
-    def process(self):
+    def process(self, fresh = True):
         data = []
         patient_mapping = dict()
         header = json.load(open(join(self.data_path, 'meta.json')))
@@ -141,8 +210,9 @@ class MutationDataset:
 
             if self.config.debug:
                 break
-        json.dump(self.feature_dict, open(join(self.config.ckpt_path, 'feature_dict.json'), 'w'))
-        json.dump(patient_mapping, open(join(self.config.ckpt_path, 'patient_mapping.json'), 'w'))
+        if fresh:
+            json.dump(self.feature_dict, open(join(self.config.ckpt_path, 'feature_dict.json'), 'w'))
+            json.dump(patient_mapping, open(join(self.config.ckpt_path, 'patient_mapping.json'), 'w'))
         return data
 
     def decompose(self, upstream, downstream, mutation):

@@ -34,8 +34,10 @@ if __name__ == "__main__":
     parser.add_argument('--debug', action='store_true')
     parser.add_argument('--temp', type=float, default=1.0)
     parser.add_argument('--seed', type=int, default=888)
+    #
     config = parser.parse_args()
     config.ckpt_path = f'ckpt/{config.name}'
+    # 
     save_settings()
     record_fout = open(os.path.join(config.ckpt_path, 'record.txt'), 'a')
 
