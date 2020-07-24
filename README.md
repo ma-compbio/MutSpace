@@ -46,7 +46,6 @@ The main function to run MutSpace is 'train.py'. It usage is shown below:
       --n_negative  Number of negative samples generated per positve sample [15]
       --temp        Normalization parameter for calculation of similarity [1.0]
       --seed        Random seed [888]
-    ```
 
 ## Inputs and pre-processing
 MutSpace currently only supports single nucleotide variants (SNVs), including C to A(`C->A`), C to G (`C->G`), C to T (`C->T`), T to A (`T->A`), T to C (`T->C`), and T to G (`T->G`) mutation. Mutations with reference bases as G or A need to be converted into C or T by reverse-complement mutations (e.g., `G->T` will become `C->A`). Notably, the sequence context may also need to convert to its reverse complement as we always need the upstream and downstream sequence of the mutation. We also highly recommend removing mutations located in the protein-coding regions as the sequence context of those mutations may be much different from non-coding somatic mutations and thus bias the training process.
@@ -68,6 +67,7 @@ In the same folder, create a JSON file named __meta.json__. This file is the con
         "a": [12],
         "b": [3, 11]
     }
+    ```
 * __uid__:
 The column index (start from 0) for patient id. Note that each patient can only have one patient id. In the above example, uid refers to the 4th column `patient_id`.
 * __upstream__:
