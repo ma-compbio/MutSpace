@@ -1,15 +1,17 @@
 ## Table of Contents 
-1. [Introduction] (#introduction)
-2. [Prerequisites] (#prerequisites)
-3. [Usage] (#usage)
-4. [Inputs and pre-processing] (#inputs-and-pre-processing)
-5. [Outputs] (#outputs)
+1. [Introduction](#introduction)
+2. [Prerequisites](#prerequisites)
+3. [Usage](#usage)
+4. [Inputs and pre-processing](#inputs-and-pre-processing)
+5. [Outputs](#outputs)
 
 <a name="introduction"/>
+
 # Introduction 
 MutSpace is a method aiming to address the computational challenge to consider large-scale sequence context for mutational signatures. It can effectively extract patient-specific features by jointly modeling mutations and patients in a latent high-dimensional space. As shown in the figure below, the input of MutSpace consists of somatic mutations and cancer patients, which are naturally connected by the fact that a somatic mutation is observed in one patient. The output of MutSpace is a set of vectors in latent high-dimensional space for mutations and cancer patients. Importantly, the similarity of those embedded vectors of mutations and cancer patients reflect the closeness of these entities. For example, patients' vectors with similar mutational landscapes tend to be close in the high-dimensional space, and mutations observed in one patient tend to be close to that patient in the latent space. The embeddings of patients reported from MutSpace can be used to various tasks, including cancer subtype identification, cancer patients clustering, or used as alternative mutational features extracted from patients as compared with traditional mutational spectrum/frequency-based method. See the [slides](https://drive.google.com/file/d/1pzsuH-5VayxSusziN9OKumZNy2VVwKB2/view?usp=sharing) presented at ISMB 2020.
 
 <a name="prerequisites"/>
+
 # Prerequisites
 MutSpace requires:
 * Python (tested 3.7.3)
@@ -24,17 +26,17 @@ MutSpace requires:
 MutSpace has tested using NVIDIA 2080S GPU
 
 <a name="usage"/>
+
 # Usage
 The main function to run MutSpace is 'train.py'. It usage is shown below:
-    ```no-highlight
-    Run "python train.py"
-    usage: train.py [-h] [--name NAME] [--data_path DATA_PATH]
-                    [--ring_num RING_NUM] [--ring_width RING_WIDTH]
-                    [--margin MARGIN] [--max_norm MAX_NORM] [--emb_dim EMB_DIM]
-                    [--epochs EPOCHS] [--batch_size BATCH_SIZE] [--lr LR]
-                    [--n_negative N_NEGATIVE] [--debug] [--temp TEMP] [--seed SEED]
-
-    The following arguments are mandatory:
+```no-highlight
+Run "python train.py"
+usage: train.py [-h] [--name NAME] [--data_path DATA_PATH]
+                [--ring_num RING_NUM] [--ring_width RING_WIDTH]
+                [--margin MARGIN] [--max_norm MAX_NORM] [--emb_dim EMB_DIM]
+                [--epochs EPOCHS] [--batch_size BATCH_SIZE] [--lr LR]
+                [--n_negative N_NEGATIVE] [--debug] [--temp TEMP] [--seed SEED]
+The following arguments are mandatory:
       --name        Name of the run. A forlder with this name will be created in the directory where this script is being executed
       ---data_path  Path to the folder containing mutation data
     The following arguments are optional:
@@ -49,9 +51,10 @@ The main function to run MutSpace is 'train.py'. It usage is shown below:
       --n_negative  Number of negative samples generated per positve sample [15]
       --temp        Normalization parameter for calculation of similarity [1.0]
       --seed        Random seed [888]
-    ```
+```
 
 <a name="inputs-and-pre-processing"/>
+
 # Inputs and pre-processing
 MutSpace currently only supports single nucleotide variants (SNVs), including C to A(`C->A`), C to G (`C->G`), C to T (`C->T`), T to A (`T->A`), T to C (`T->C`), and T to G (`T->G`) mutation. Mutations with reference bases as G or A need to be converted into C or T by reverse-complement mutations (e.g., `G->T` will become `C->A`). Notably, the sequence context may also need to convert to its reverse complement as we always need the upstream and downstream sequence of the mutation. We also highly recommend removing mutations located in the protein-coding regions as the sequence context of those mutations may be much different from non-coding somatic mutations and thus bias the training process.
 
