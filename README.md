@@ -1,15 +1,15 @@
-# Table of Contents 
+## Table of Contents 
 1. [Introduction] (#introduction)
 2. [Prerequisites] (#prerequisites)
 3. [Usage] (#usage)
 4. [Inputs and pre-processing] (#inputs-and-pre-processing)
 5. [Outputs] (#outputs)
 
-<a name="introduction">
+<a name="introduction"/>
 # Introduction 
 MutSpace is a method aiming to address the computational challenge to consider large-scale sequence context for mutational signatures. It can effectively extract patient-specific features by jointly modeling mutations and patients in a latent high-dimensional space. As shown in the figure below, the input of MutSpace consists of somatic mutations and cancer patients, which are naturally connected by the fact that a somatic mutation is observed in one patient. The output of MutSpace is a set of vectors in latent high-dimensional space for mutations and cancer patients. Importantly, the similarity of those embedded vectors of mutations and cancer patients reflect the closeness of these entities. For example, patients' vectors with similar mutational landscapes tend to be close in the high-dimensional space, and mutations observed in one patient tend to be close to that patient in the latent space. The embeddings of patients reported from MutSpace can be used to various tasks, including cancer subtype identification, cancer patients clustering, or used as alternative mutational features extracted from patients as compared with traditional mutational spectrum/frequency-based method. See the [slides](https://drive.google.com/file/d/1pzsuH-5VayxSusziN9OKumZNy2VVwKB2/view?usp=sharing) presented at ISMB 2020.
 
-<a name="prerequisites">
+<a name="prerequisites"/>
 # Prerequisites
 MutSpace requires:
 * Python (tested 3.7.3)
@@ -23,7 +23,7 @@ MutSpace requires:
 
 MutSpace has tested using NVIDIA 2080S GPU
 
-<a name="usage">
+<a name="usage"/>
 # Usage
 The main function to run MutSpace is 'train.py'. It usage is shown below:
     ```no-highlight
@@ -51,7 +51,7 @@ The main function to run MutSpace is 'train.py'. It usage is shown below:
       --seed        Random seed [888]
     ```
 
-<a name="inputs-and-pre-processing">
+<a name="inputs-and-pre-processing"/>
 # Inputs and pre-processing
 MutSpace currently only supports single nucleotide variants (SNVs), including C to A(`C->A`), C to G (`C->G`), C to T (`C->T`), T to A (`T->A`), T to C (`T->C`), and T to G (`T->G`) mutation. Mutations with reference bases as G or A need to be converted into C or T by reverse-complement mutations (e.g., `G->T` will become `C->A`). Notably, the sequence context may also need to convert to its reverse complement as we always need the upstream and downstream sequence of the mutation. We also highly recommend removing mutations located in the protein-coding regions as the sequence context of those mutations may be much different from non-coding somatic mutations and thus bias the training process.
 
@@ -89,7 +89,7 @@ The column index list for additional mutations' features except for sequence con
 * __b__:
 The column index list for patients' features. In the above example, this refers to the 4th column patient id and the 12th column cancer type label (`cancer_id`). 
 
-<a name="outputs">
+<a name="outputs"/>
 # Outputs
 After the training is finished, a folder named `ckpt` should be created in the directory where train.py is being executed. A folder with name specified by the parameter `--name`` contains the output of MutSpace. You should see multiple check point files with suffix .pth. Each check point file is a model file that can be loaded using torch (e.g., `torch.load("49.pth", map_location = 'cpu')`). The file name indicates that file is captured during which epoch. For example, `0.pth` means the first epoch, and `49.pth` means the 50th epoch. Each check point file is actually a big 2D matrix with each row as an embedding of features including patient's id, cancer type, sub-components, etc.
 
