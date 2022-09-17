@@ -1,0 +1,27 @@
+{
+    "patient_id":"donor_id",
+    "cancer_type":"NA",
+    "cancer_type_default":"ICGC-BRCA-EU",
+    "cancer_subtype":"PAM50.subtype",
+    "col_list": 
+    {
+        "ER":"ER",
+        "PR":"PR",
+        "HER2":"HER2",
+        "HRD_quartile":"HRD_quartile",
+        "PAM50.subtype.v2":"PAM50.subtype.v2",
+        "Sig_1":"Sig_1",
+        "Sig_2":"Sig_2",
+        "Sig_3":"Sig_3",
+        "Sig_5":"Sig_5",
+        "Sig_6":"Sig_6",
+        "Sig_8":"Sig_8",
+        "Sig_13":"Sig_13",
+        "Sig_17":"Sig_17",
+        "Sig_18":"Sig_18",
+        "Sig_20":"Sig_20",
+        "Sig_26":"Sig_26",
+        "Sig_30":"Sig_30",
+        "donor_age":"donor_age_at_diagnosis"
+    }
+}
